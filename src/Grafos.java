@@ -5,15 +5,15 @@ public class Grafos {
     private String[] nodos;
     private int[][] matrizAdyacencia;
     private int[][] matrizIncidencia;
-    private Nodo puntaListaAdyacencia;
+    private Nodo puntaListaAdy;
 
     // constructor
 
     public Grafos(String[] nodos) {
         this.nodos = nodos;
         this.matrizAdyacencia = new int[nodos.length][nodos.length];
-        // this.matrizIncidencia = 
-        this.puntaListaAdyacencia = null;
+        this.matrizIncidencia = new int[nodos.length][1]; // se inicia con 1 columna pero se ira aumentando
+        this.puntaListaAdy = null;
     }
 
     // getters y setters
@@ -37,6 +37,16 @@ public class Grafos {
     public void setMatrizAdyacencia(int i, int j, int valor) {
         this.matrizAdyacencia[i][j] = valor;
     }
+
+    public int[][] getMatrizIncidencia() {
+        return matrizIncidencia;
+    }
+
+    public void setMatrizIncidencia(int[][] matrizIncidencia) {
+        this.matrizIncidencia = matrizIncidencia;
+    }
+
+    
 
     // métodos
 
@@ -62,11 +72,18 @@ public class Grafos {
                     conexiones = conexionesString.split(",");
                     entradaValida = true;
 
+                    /*
+                    
+                    Validaciones
+                    */
+
+                    // si no se ingresa nada
                     if (conexionesString.isEmpty()) {
                         JOptionPane.showMessageDialog(null, "Error: Debe ingresar al menos un nodo.");
                         entradaValida = false;
                     }
 
+                    // si se ingresan comas sin nodos entre ellas
                     for (int j = 0; j < conexiones.length && entradaValida; j++) {
                         if (conexiones[j].isEmpty()) {
                             JOptionPane.showMessageDialog(null, "Error: Hay comas sin nodo entre ellas. Ingrese solo nodos válidos.");
@@ -74,6 +91,7 @@ public class Grafos {
                         }
                     }
 
+                    // si el nodo se conecta consigo mismo
                     for (int j = 0; j < conexiones.length && entradaValida; j++) {
                         if (conexiones[j].equals(nodos[i])) {
                             JOptionPane.showMessageDialog(null, "Error: El nodo \"" + nodos[i] + "\" no puede conectarse consigo mismo.");
@@ -81,11 +99,14 @@ public class Grafos {
                         }
                     }
 
+                    // si se ingresan nodos repetidos
                     if (entradaValida && MenuGrafos.verificarNodosRepetidos(conexiones)) {
                         entradaValida = false;
                     }
 
                     if (entradaValida) {
+
+                        // si ya existe una arista entre el nodo actual y alguno de los nodos ingresados
                         for (int j = 0; j < conexiones.length && entradaValida; j++) {
                             for (int k = 0; k < nodos.length && entradaValida; k++) {
                                 if (conexiones[j].equals(nodos[k]) && grafo.getMatrizAdyacencia()[i][k] == 1) {
@@ -96,20 +117,24 @@ public class Grafos {
                         }
                     }
 
+                    // si se ingresan nodos que no existen en el grafo
                     if (entradaValida) {
                         entradaValida = verificarSiTodosLosNodosExisten(conexiones, nodos);
                     }
 
                 } while (entradaValida == false);
 
+                // si pasaron todas las validaciones, se llena la matriz de adyacencia
                 for (int j = 0; j < conexiones.length; j++) {
                     for (int k = 0; k < nodos.length; k++) {
-                        if (conexiones[j].equals(nodos[k])) {
+                        if (conexiones[j].equals(nodos[k])) { // si se encuentra el nodo ingresado entre los nodos del grafo
                             grafo.setMatrizAdyacencia(i, k, 1);
                             grafo.setMatrizAdyacencia(k, i, 1);
                         }
                     }
                 }
+
+                // conteo de aristas para llenar la matriz de incidencia
                 
             }
             
@@ -123,6 +148,9 @@ public class Grafos {
         return grafo;
     }
 
+    public void updateMatrizIncidencia(int tipo) {
+
+    }
     public String mostrarConexionesDeNodo(int indiceNodo, int tipo) {
 
         StringBuilder conexiones = new StringBuilder();
