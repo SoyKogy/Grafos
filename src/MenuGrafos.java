@@ -12,12 +12,17 @@ public class MenuGrafos {
             switch(opcion) {
                 
                 case 1:
-                    nodosString = JOptionPane.showInputDialog("Ingrese los nodos del grafo, separados por comas: ");
-                    Grafos.crearGrafo(nodosString, 1);
+                    nodosString = JOptionPane.showInputDialog("Ingrese los nodos del grafo, separados por comas.\n\n" +
+                        "Ejemplo: A,B,FC,D,12,2,"
+                    );
+                    Grafos grafo = Grafos.crearGrafo(nodosString, 1);
+
                     menuGrafos();
                     break;
                 case 2:
-                    nodosString = JOptionPane.showInputDialog("Ingrese los nodos del grafo, separados por comas: ");
+                    nodosString = JOptionPane.showInputDialog("Ingrese los nodos del grafo, separados por comas.\n\n" +
+                        "Ejemplo: A,B,FC,D,12,2,"
+                    );
                     Grafos.crearGrafo(nodosString, 2);
                     menuGrafos();
                     break;
