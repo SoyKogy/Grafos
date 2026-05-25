@@ -52,7 +52,7 @@ public class Grafos {
             
             for (int i = 0; i < nodos.length; i++) {
 
-                boolean nodoExiste = false;
+                boolean entradaValida = false;
                 String conexionesString;
 
                 do {
@@ -60,23 +60,56 @@ public class Grafos {
                                                                     + nodos[i] + "\", separados por comas.\n\n");
                     
                     conexiones = conexionesString.split(",");
+                    entradaValida = true;
 
-                    // verificacion de que los nodos existan
-                    for (int j = 0; j < conexiones.length || !nodoExiste; j++) {
-                        
-                        for (int k = 0; k < nodos.length || nodoExiste; k++) {
-                            if (conexiones[j].equals(nodos[k])) {
-                                nodoExiste = true;
-                            }
-                        }
+                    if (conexionesString.isEmpty()) {
+                        JOptionPane.showMessageDialog(null, "Error: Debe ingresar al menos un nodo.");
+                        entradaValida = false;
+                    }
 
-                        if (!nodoExiste) {
-                            JOptionPane.showMessageDialog(null, "El nodo \"" + conexiones[j] + "\" no existe. Ingrese un nodo válido.");
+                    for (int j = 0; j < conexiones.length && entradaValida; j++) {
+                        if (conexiones[j].isEmpty()) {
+                            JOptionPane.showMessageDialog(null, "Error: Hay comas sin nodo entre ellas. Ingrese solo nodos válidos.");
+                            entradaValida = false;
                         }
                     }
-                } while (nodoExiste == false);
-                
 
+                    for (int j = 0; j < conexiones.length && entradaValida; j++) {
+                        if (conexiones[j].equals(nodos[i])) {
+                            JOptionPane.showMessageDialog(null, "Error: El nodo \"" + nodos[i] + "\" no puede conectarse consigo mismo.");
+                            entradaValida = false;
+                        }
+                    }
+
+                    if (entradaValida && MenuGrafos.verificarNodosRepetidos(conexiones)) {
+                        entradaValida = false;
+                    }
+
+                    if (entradaValida) {
+                        for (int j = 0; j < conexiones.length && entradaValida; j++) {
+                            for (int k = 0; k < nodos.length && entradaValida; k++) {
+                                if (conexiones[j].equals(nodos[k]) && grafo.getMatrizAdyacencia()[i][k] == 1) {
+                                    JOptionPane.showMessageDialog(null, "Error: Ya existe una arista entre \"" + nodos[i] + "\" y \"" + nodos[k] + "\".");
+                                    entradaValida = false;
+                                }
+                            }
+                        }
+                    }
+
+                    if (entradaValida) {
+                        entradaValida = verificarSiTodosLosNodosExisten(conexiones, nodos);
+                    }
+
+                } while (entradaValida == false);
+
+                for (int j = 0; j < conexiones.length; j++) {
+                    for (int k = 0; k < nodos.length; k++) {
+                        if (conexiones[j].equals(nodos[k])) {
+                            grafo.setMatrizAdyacencia(i, k, 1);
+                            grafo.setMatrizAdyacencia(k, i, 1);
+                        }
+                    }
+                }
                 
             }
             
@@ -151,5 +184,55 @@ public class Grafos {
         }
 
         return conexiones.toString();
+    }
+
+    public boolean verificarNodosRepetidos() {
+
+        boolean repetidos = false;
+
+        for (int i = 0; i < nodos.length && !repetidos; i++) {
+            for (int j = 0; j < nodos.length && !repetidos; j++) {
+
+                if (i == j) {
+                    j++;
+                }
+                if (j < nodos.length && nodos[i].equals(nodos[j])) {
+                    JOptionPane.showMessageDialog(null, "Error: No pueden haber nodos repetidos.");
+                    
+                    repetidos = true;
+                    j = nodos.length;
+                }
+            }
+        }
+
+        return repetidos;
+    }
+
+    public static boolean verificarSiTodosLosNodosExisten(String[] conexiones, String[] nodos) {
+
+        boolean todosExisten = true;
+
+        // verificacion de que los nodos existan
+        for (int j = 0; j < conexiones.length && todosExisten; j++) {
+            
+            boolean nodoExiste = false;
+
+            // este ciclo se rompe cuando se encuentra el nodo
+            for (int k = 0; k < nodos.length && !nodoExiste; k++) {
+
+                if (conexiones[j].equals(nodos[k])) {                    
+                    nodoExiste = true;
+                }
+            }
+
+            // si no se encontró el nodo entre los nodos del grafo
+            if (!nodoExiste) {
+                JOptionPane.showMessageDialog(null, "Error: El nodo \"" + conexiones[j] + "\" no existe. Por favor, ingrese solo nodos válidos.");
+                todosExisten = false;
+            }
+
+        }
+
+        return todosExisten;
     }
 }

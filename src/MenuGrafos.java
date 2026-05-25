@@ -42,7 +42,7 @@ public class MenuGrafos {
 
                         repetidos = verificarNodosRepetidos(nodosDirigidos);
                     } while (repetidos == true);
-                    
+
                     Grafos grafoDirigido = Grafos.crearGrafo(nodosDirigidos, 2);
 
                     menuGrafos();
@@ -118,7 +118,7 @@ public class MenuGrafos {
                     j++;
                 }
                 if (j < nodos.length && nodos[i].equals(nodos[j])) {
-                    JOptionPane.showMessageDialog(null, "Error: No se pueden ingresar nodos repetidos.");
+                    JOptionPane.showMessageDialog(null, "Error: No pueden haber nodos repetidos.");
                     
                     repetidos = true;
                     j = nodos.length;
