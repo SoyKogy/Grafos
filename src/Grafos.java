@@ -40,8 +40,7 @@ public class Grafos {
 
     // métodos
 
-    public static Grafos crearGrafo(String nodosString, int tipo) {
-        String[] nodos = nodosString.split(",");
+    public static Grafos crearGrafo(String[] nodos, int tipo) {
 
         Grafos grafo = new Grafos(nodos);
         /* tipo 1 = grafo simple no dirigido */
@@ -57,7 +56,7 @@ public class Grafos {
                 String conexionesString;
 
                 do {
-                    conexionesString = JOptionPane.showInputDialog(grafo.mostrarConexionesDeNodo(i, 1) + "\nIngrese con qué nodos estará conectado el nodo \""
+                    conexionesString = JOptionPane.showInputDialog(grafo.mostrarConexionesDeNodo(i, 1) + "\n\nIngrese con qué nodos estará conectado el nodo \""
                                                                     + nodos[i] + "\", separados por comas.\n\n");
                     
                     conexiones = conexionesString.split(",");

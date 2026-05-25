@@ -8,22 +8,43 @@ public class MenuGrafos {
         String nodosString = new String();
 
         do {
+            boolean repetidos = false;
+
             opcion = menu(0);            
             switch(opcion) {
                 
                 case 1:
-                    nodosString = JOptionPane.showInputDialog("Ingrese los nodos del grafo, separados por comas.\n\n" +
-                        "Ejemplo: A,B,FC,D,12,2,"
-                    );
-                    Grafos grafo = Grafos.crearGrafo(nodosString, 1);
+
+                    String[] nodosNoDirigidos;
+                    
+                    do {
+                        nodosString = JOptionPane.showInputDialog("Ingrese los nodos del grafo, separados por comas.\n\n" +
+                        "Ejemplo: A,B,FC,D,12,2"
+                        );
+                        nodosNoDirigidos = nodosString.split(",");
+
+                        repetidos = verificarNodosRepetidos(nodosNoDirigidos);
+                    } while (repetidos == true);
+
+                    Grafos grafoNoDirigido = Grafos.crearGrafo(nodosNoDirigidos, 1);
 
                     menuGrafos();
                     break;
                 case 2:
-                    nodosString = JOptionPane.showInputDialog("Ingrese los nodos del grafo, separados por comas.\n\n" +
-                        "Ejemplo: A,B,FC,D,12,2,"
-                    );
-                    Grafos.crearGrafo(nodosString, 2);
+                    
+                    String[] nodosDirigidos = nodosString.split(",");
+
+                    do {
+                        nodosString = JOptionPane.showInputDialog("Ingrese los nodos del grafo, separados por comas.\n\n" +
+                        "Ejemplo: A,B,FC,D,12,2"
+                        );
+                        nodosDirigidos = nodosString.split(",");
+
+                        repetidos = verificarNodosRepetidos(nodosDirigidos);
+                    } while (repetidos == true);
+                    
+                    Grafos grafoDirigido = Grafos.crearGrafo(nodosDirigidos, 2);
+
                     menuGrafos();
                     break;
                 case 0:
@@ -84,5 +105,27 @@ public class MenuGrafos {
             }
         } while (opcion != 0);
         
+    }
+
+    public static boolean verificarNodosRepetidos(String[] nodos) {
+
+        boolean repetidos = false;
+
+        for (int i = 0; i < nodos.length && !repetidos; i++) {
+            for (int j = 0; j < nodos.length && !repetidos; j++) {
+
+                if (i == j) {
+                    j++;
+                }
+                if (j < nodos.length && nodos[i].equals(nodos[j])) {
+                    JOptionPane.showMessageDialog(null, "Error: No se pueden ingresar nodos repetidos.");
+                    
+                    repetidos = true;
+                    j = nodos.length;
+                }
+            }
+        }
+
+        return repetidos;
     }
 }
