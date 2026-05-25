@@ -169,6 +169,9 @@ public class Grafos {
             // crear la matriz de incidencia
             grafo.setMatrizIncidencia(grafo.updateMatrizInc(1));
             
+            // llenar lista de adyacencia
+            grafo.llenarListaAdy();
+
         /* tipo 2 = multigrafo dirigido */
         } else if (tipo == 2) {
             System.out.println("Has seleccionado la opción 2: Crear un grafo dirigido");
@@ -199,6 +202,50 @@ public class Grafos {
 
         return nuevaMatrizInc;
     }
+
+    public void llenarListaAdy() {
+        
+        // solo se pidió lista de adyacencia para grafo no dirigido
+        // entonces no se pide tipo 
+        Nodo[] listaAdy = new Nodo[nodos.length];
+
+        for (int i = 0; i < nodos.length; i++) { // itera sobre los nodos del grafo
+
+            Nodo nodoActual = null; // se crea un nodo para el nodo actual,
+                                    // pero no se asigna a la lista de adyacencia
+                                    // hasta que se encuentre el primer nodo adyacente
+            int aristasNodo = contarAristasDeNodo(i, 1);
+
+            if (aristasNodo > 0) {
+
+                for (int j = 0; j < nodos.length; j++) {
+                
+                    if (this.getMatrizAdyacencia()[i][j] == 1) {
+
+                        // si el nodo actual es el primer nodo adyacente encontrado
+                        if (nodoActual == null) {
+                            nodoActual = new Nodo(nodos[j]); // se asigna el primer nodo adyacente al nodo actual
+                            listaAdy[i] = nodoActual; // se asigna el nodo adyacente a la posición del nodo actual en la lista de adyacencia
+                        
+                        
+                        // sino, si ya había un nodo antes del actual
+                        } else {
+                            Nodo nodoAdy = new Nodo(nodos[j]);
+                            nodoActual.setLiga(nodoAdy);
+
+                            nodoActual = nodoAdy;
+                        }
+                        
+                    }
+                }
+                
+            }
+        }
+        
+        this.setPuntaListAdy(listaAdy);
+    }
+
+    // metodos helpers
 
     public String mostrarConexionesDeNodo(int indiceNodo, int tipo) {
 
@@ -326,5 +373,22 @@ public class Grafos {
         return aristas;        
     }
 
-    
+    public int contarAristasDeNodo(int indiceNodo, int tipo) {
+        int aristas = 0;
+
+        if (tipo == 1) {
+            for (int i = 0; i < nodos.length; i++) {
+                if (this.getMatrizAdyacencia()[indiceNodo][i] == 1) {
+                    aristas++;
+                }
+            }
+        }
+        
+        if (tipo == 2) {
+            // TODO
+        }
+        return aristas;
+    }
+
+
 }
