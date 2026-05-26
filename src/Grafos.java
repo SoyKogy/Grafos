@@ -6,7 +6,7 @@ public class Grafos {
     private int[][] matrizAdyacencia;
     private int[][] matrizIncidencia;
     private Nodo[] puntaListaAdy;
-    private int tipo; // 1 = grafo simple no dirigido, 2 = multigrafo dirigido
+    private int tipo; // 1 = grafo simple no dirigido, 2 = grafo simple dirigido
     
 
     // constructor
@@ -188,7 +188,7 @@ public class Grafos {
             // llenar lista de adyacencia
             grafo.llenarListaAdy();
 
-        /* tipo 2 = multigrafo dirigido */
+        /* tipo 2 = grafo simple dirigido */
         }
         
         if (tipo == 2) {
@@ -462,6 +462,10 @@ public class Grafos {
 
         StringBuilder matrizString = new StringBuilder("Matriz de incidencia:\n\n   ");
 
+        if (this.tipo == 2) {
+            matrizString.append("Convencion para grafo dirigido: 1 = salida, 2 = entrada, 3 = bucle\n\n");
+        }
+
         matrizString.append("  "); 
         for (int i = 0; i < matrizIncidencia[0].length; i++) {
             matrizString.append(i).append(" "); // primera fila
@@ -502,7 +506,7 @@ public class Grafos {
                 }
             }
 
-        /* tipo 2 = multigrafo dirigido */
+        /* tipo 2 = grafo simple dirigido */
         } else if (this.tipo == 2) {
             int[][] ady = this.getMatrizAdyacencia(); // Obtener la matriz de adyacencia del grafo
             conexiones.append("El nodo " + nodos[indiceNodo] + " tiene estas aristas:");
@@ -635,7 +639,10 @@ public class Grafos {
         }
         
         if (tipo == 2) {
-            // vacio ya que no se pidio
+            // vacio ya que habria que hacer 2 metoidos separados:
+            /* - contarEntrantesDeNodo()
+               - contarSalientesDeNodo()
+            */
         }
         return aristas;
     }
