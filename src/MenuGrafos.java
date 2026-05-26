@@ -28,7 +28,7 @@ public class MenuGrafos {
 
                     Grafos grafoNoDirigido = Grafos.crearGrafo(nodosNoDirigidos, 1);
 
-                    menuGrafos();
+                    menuGrafos(grafoNoDirigido);
                     break;
                 case 2:
                     
@@ -45,7 +45,7 @@ public class MenuGrafos {
 
                     Grafos grafoDirigido = Grafos.crearGrafo(nodosDirigidos, 2);
 
-                    menuGrafos();
+                    menuGrafos(grafoDirigido);
                     break;
                 case 0:
                     break;
@@ -60,13 +60,13 @@ public class MenuGrafos {
 
         int opcionUsuario = 0;
         if (opcion == 0) {
-            opcionUsuario = Integer.parseInt(JOptionPane.showInputDialog(null, "======= Grafos =======" +
+            opcionUsuario = Integer.parseInt(JOptionPane.showInputDialog(null, "======= Grafos =======\n" +
                                 "1. Crear un grafo no dirigido\n" +
                                 "2. Crear un grafo dirigido\n\n" +
                                 "0. Salir"
             ));
         } else if (opcion == 1) {
-            opcionUsuario = Integer.parseInt(JOptionPane.showInputDialog(null, "======= Grafos =======" +
+            opcionUsuario = Integer.parseInt(JOptionPane.showInputDialog(null, "======= Grafos =======\n" +
                             "1. Mostrar grafo\n" +
                             "2. Mostrar matriz de adyacencia\n" +
                             "3. Mostrar lista de adyacencia\n" +
@@ -78,7 +78,7 @@ public class MenuGrafos {
         return opcionUsuario;
     }
 
-    public static void menuGrafos() {
+    public static void menuGrafos(Grafos grafo) {
         
         int opcion = 0;
         do {
@@ -86,16 +86,16 @@ public class MenuGrafos {
                 switch(opcion) {
                 
                 case 1:
-                    // mostrar grafo
+                    grafo.mostrarGrafo();
                     break;
                 case 2:
-                    // mostrar matriz de adyacencia
+                    grafo.mostrarMatAdy();
                     break;
                 case 3:
-                    // mostrar lista de adyacencia
+                    grafo.mostrarListAdy();
                     break;
                 case 4:
-                    // mostrar matriz de incidencia
+                    grafo.mostrarMatInc();
                     break;
                 case 0:
                     break;

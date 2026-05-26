@@ -6,15 +6,17 @@ public class Grafos {
     private int[][] matrizAdyacencia;
     private int[][] matrizIncidencia;
     private Nodo[] puntaListaAdy;
+    private int tipo; // 1 = grafo simple no dirigido, 2 = multigrafo dirigido
     
 
     // constructor
 
-    public Grafos(String[] nodos) {
+    public Grafos(String[] nodos, int tipo) {
         this.nodos = nodos;
         this.matrizAdyacencia = new int[nodos.length][nodos.length];
         this.matrizIncidencia = null;
         this.puntaListaAdy = null;
+        this.tipo = tipo;
     }
 
     // getters y setters
@@ -55,11 +57,19 @@ public class Grafos {
         return puntaListaAdy;
     }
 
+    public int getTipo() {
+        return tipo;
+    }
+
+    public void setTipo(int tipo) {
+        this.tipo = tipo;
+    }
+
     // métodos
 
     public static Grafos crearGrafo(String[] nodos, int tipo) {
 
-        Grafos grafo = new Grafos(nodos);
+        Grafos grafo = new Grafos(nodos, tipo);
         /* tipo 1 = grafo simple no dirigido */
 
         String[] conexiones;
@@ -85,7 +95,9 @@ public class Grafos {
                     adicional:
                     6. si se ingresan nodos que no existen en el grafo -> false
                     */
+                
                 boolean tieneTodas = true;  
+                //todo: solucionar esta variable sin usar
                 String conexionesString;
 
                 for (int j = 0; j < nodos.length; j++) {
@@ -95,75 +107,80 @@ public class Grafos {
                         }
                     }
                 }
-                do {
-                    conexionesString = JOptionPane.showInputDialog(grafo.mostrarConexionesDeNodo(i, 1) + "\n\nIngrese con qué nodos estará conectado el nodo \""
-                                                                    + nodos[i] + "\", separados por comas.\n\n");
-                    
-                    conexiones = conexionesString.split(",");
-                    entradaValida = true;
 
-                    /*
-                    
-                    Validaciones
-                    */
+                if (!tieneTodas) {
+                    do {
+                        conexionesString = JOptionPane.showInputDialog(grafo.mostrarConexionesDeNodo(i, 1) + "\n\nIngrese con qué nodos estará conectado el nodo \""
+                                                                        + nodos[i] + "\", separados por comas.\n\n");
+                        
+                        conexiones = conexionesString.split(",");
+                        entradaValida = true;
 
-                    // si no se ingresa nada
-                    if (conexionesString.isEmpty()) {
-                        JOptionPane.showMessageDialog(null, "Error: Debe ingresar al menos un nodo.");
-                        entradaValida = false;
-                    }
+                        /*
+                        
+                        Validaciones
+                        */
 
-                    // si se ingresan comas sin nodos entre ellas
-                    for (int j = 0; j < conexiones.length && entradaValida; j++) {
-                        if (conexiones[j].isEmpty()) {
-                            JOptionPane.showMessageDialog(null, "Error: Hay comas sin nodo entre ellas. Ingrese solo nodos válidos.");
+                        // si no se ingresa nada
+                        if (conexionesString.isEmpty()) {
+                            JOptionPane.showMessageDialog(null, "Error: Debe ingresar al menos un nodo.");
                             entradaValida = false;
                         }
-                    }
 
-                    // si el nodo se conecta consigo mismo
-                    for (int j = 0; j < conexiones.length && entradaValida; j++) {
-                        if (conexiones[j].equals(nodos[i])) {
-                            JOptionPane.showMessageDialog(null, "Error: El nodo \"" + nodos[i] + "\" no puede conectarse consigo mismo.");
-                            entradaValida = false;
-                        }
-                    }
-
-                    // si se ingresan nodos repetidos
-                    if (entradaValida && MenuGrafos.verificarNodosRepetidos(conexiones)) {
-                        entradaValida = false;
-                    }
-
-                    if (entradaValida) {
-
-                        // si ya existe una arista entre el nodo actual y alguno de los nodos ingresados
+                        // si se ingresan comas sin nodos entre ellas
                         for (int j = 0; j < conexiones.length && entradaValida; j++) {
-                            for (int k = 0; k < nodos.length && entradaValida; k++) {
-                                if (conexiones[j].equals(nodos[k]) && grafo.getMatrizAdyacencia()[i][k] == 1) {
-                                    JOptionPane.showMessageDialog(null, "Error: Ya existe una arista entre \"" + nodos[i] + "\" y \"" + nodos[k] + "\".");
-                                    entradaValida = false;
+                            if (conexiones[j].isEmpty()) {
+                                JOptionPane.showMessageDialog(null, "Error: Hay comas sin nodo entre ellas. Ingrese solo nodos válidos.");
+                                entradaValida = false;
+                            }
+                        }
+
+                        // si el nodo se conecta consigo mismo
+                        for (int j = 0; j < conexiones.length && entradaValida; j++) {
+                            if (conexiones[j].equals(nodos[i])) {
+                                JOptionPane.showMessageDialog(null, "Error: El nodo \"" + nodos[i] + "\" no puede conectarse consigo mismo.");
+                                entradaValida = false;
+                            }
+                        }
+
+                        // si se ingresan nodos repetidos
+                        if (entradaValida && MenuGrafos.verificarNodosRepetidos(conexiones)) {
+                            entradaValida = false;
+                        }
+
+                        if (entradaValida) {
+
+                            // si ya existe una arista entre el nodo actual y alguno de los nodos ingresados
+                            for (int j = 0; j < conexiones.length && entradaValida; j++) {
+                                for (int k = 0; k < nodos.length && entradaValida; k++) {
+                                    if (conexiones[j].equals(nodos[k]) && grafo.getMatrizAdyacencia()[i][k] == 1) {
+                                        JOptionPane.showMessageDialog(null, "Error: Ya existe una arista entre \"" + nodos[i] + "\" y \"" + nodos[k] + "\".");
+                                        entradaValida = false;
+                                    }
                                 }
                             }
                         }
-                    }
 
-                    // si se ingresan nodos que no existen en el grafo
-                    if (entradaValida) {
-                        entradaValida = verificarSiTodosLosNodosExisten(conexiones, nodos);
-                    }
+                        // si se ingresan nodos que no existen en el grafo
+                        if (entradaValida) {
+                            entradaValida = verificarSiTodosLosNodosExisten(conexiones, nodos);
+                        }
 
-                } while (entradaValida == false);
+                    } while (entradaValida == false);
 
-                // si pasaron todas las validaciones, se llena la matriz de adyacencia
-                for (int j = 0; j < conexiones.length; j++) {
-                    for (int k = 0; k < nodos.length; k++) {
-                        if (conexiones[j].equals(nodos[k])) { // si se encuentra el nodo ingresado entre los nodos del grafo
-                            grafo.setMatrizAdyacencia(i, k, 1);
-                            grafo.setMatrizAdyacencia(k, i, 1);
+                    // si pasaron todas las validaciones, se llena la matriz de adyacencia
+                    for (int j = 0; j < conexiones.length; j++) {
+                        for (int k = 0; k < nodos.length; k++) {
+                            if (conexiones[j].equals(nodos[k])) { // si se encuentra el nodo ingresado entre los nodos del grafo
+                                grafo.setMatrizAdyacencia(i, k, 1);
+                                grafo.setMatrizAdyacencia(k, i, 1);
+                            }
                         }
                     }
+                } else {
+                    JOptionPane.showMessageDialog(null, "El nodo \"" + nodos[i] + "\" ya tiene conexiones con todos los demás nodos.\nSe procederá al siguiente nodo.");
                 }
-
+                
             }
             
             // crear la matriz de incidencia
@@ -190,7 +207,7 @@ public class Grafos {
         for (int i = 0, k = 0; i < nodos.length; i++) {    // filas de mat adyacencia
             for (int j = i + 1; j < nodos.length; j++, k++) {// colms de mat adyacencia & colms de mat incidencia
                 
-                if (this.getMatrizAdyacencia()[i][j] == 1) {
+                if (j < nodos.length && k < nuevaMatrizInc[0].length && this.getMatrizAdyacencia()[i][j] == 1) {
                         
                         nuevaMatrizInc[i][k] = 1;
                         nuevaMatrizInc[j][k] = 1;
@@ -245,8 +262,98 @@ public class Grafos {
         this.setPuntaListAdy(listaAdy);
     }
 
-    // metodos helpers
+    // mostrados
 
+    public void mostrarGrafo() {
+        if (tipo == 1) {
+
+        }
+
+        if (tipo == 2) {
+
+        }
+    }
+
+    public void mostrarMatAdy() {
+        
+        StringBuilder matrizString = new StringBuilder("Matriz de adyacencia:\n\n   ");
+
+        matrizString.append("  "); 
+        for (int i = 0; i < nodos.length; i++) {
+            matrizString.append(nodos[i]).append(" "); // primera fila
+        }
+        matrizString.append("\n");
+
+        for (int i = 0; i < nodos.length; i++) {
+
+            matrizString.append(nodos[i]).append(" ");
+
+            for (int j = 0; j < matrizAdyacencia[0].length; j++) {
+                matrizString.append(" ").append(matrizAdyacencia[i][j]);
+            }
+
+            matrizString.append("\n");
+        }
+
+        JOptionPane.showMessageDialog(null, matrizString);
+    }
+
+    public void mostrarListAdy() {
+        
+        StringBuilder listaString = new StringBuilder("Lista de adyacencia:\n\n");
+
+        // solo esta diseñada para grafo tipo 1 (simple no dirigido)
+
+        Nodo nodoActual = null;
+        for (int i = 0; i < nodos.length; i++) {
+
+            nodoActual = this.getPuntaListaAdy()[i];
+
+            listaString.append(nodos[i] + ":  ");
+
+            while (nodoActual != null) {
+                listaString.append(nodoActual.getDatoNodoAdy() + " -> ");
+
+                nodoActual = nodoActual.getLiga();
+            }
+        }
+
+        JOptionPane.showMessageDialog(null, listaString);
+    }
+
+    public void mostrarMatInc() {
+
+        if (this.tipo == 1) {
+            StringBuilder matrizString = new StringBuilder("Matriz de incidencia:\n\n   ");
+
+            matrizString.append("  "); 
+            for (int i = 0; i < matrizIncidencia[0].length; i++) {
+                matrizString.append(i).append(" "); // primera fila
+            }
+            matrizString.append("\n");
+
+            for (int i = 0; i < nodos.length; i++) {
+
+                matrizString.append(nodos[i]).append(" ");
+
+                for (int j = 0; j < matrizIncidencia[0].length; j++) {
+                    matrizString.append(" ").append(matrizIncidencia[i][j]);
+                }
+
+                matrizString.append("\n");
+            }
+
+            JOptionPane.showMessageDialog(null, matrizString);
+        } 
+
+        if (this.tipo == 2) {
+            JOptionPane.showMessageDialog(null, "No existe aún matriz de incidencia para grafos dirigidos.");
+        }
+        
+    }
+
+    // metodos helpers
+ 
     public String mostrarConexionesDeNodo(int indiceNodo, int tipo) {
 
         StringBuilder conexiones = new StringBuilder();
