@@ -364,7 +364,7 @@ public class Grafos {
             Nodo nodoActual = null; // se crea un nodo para el nodo actual,
                                     // pero no se asigna a la lista de adyacencia
                                     // hasta que se encuentre el primer nodo adyacente
-            int aristasNodo = contarAristasDeNodo(i, 1);
+            int aristasNodo = contarAristasDeNodo(i);
 
             if (aristasNodo > 0) {
 
@@ -626,7 +626,7 @@ public class Grafos {
     public int contarAristasDeNodo(int indiceNodo) {
         int aristas = 0;
 
-        if (tipo == 1) {
+        if (this.tipo == 1) {
             for (int i = 0; i < nodos.length; i++) {
                 if (this.getMatrizAdyacencia()[indiceNodo][i] == 1) {
                     aristas++;
@@ -635,7 +635,7 @@ public class Grafos {
         }
         
         if (tipo == 2) {
-            // TODO
+            // vacio ya que no se pidio
         }
         return aristas;
     }
