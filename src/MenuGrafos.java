@@ -71,6 +71,10 @@ public class MenuGrafos {
                             "2. Mostrar matriz de adyacencia\n" +
                             "3. Mostrar lista de adyacencia\n" +
                             "4. Mostrar matriz de incidencia\n\n" +
+                            "5. Recorrido DFS\n" +
+                            "6. Recorrido BFS\n" +
+                            "7. Insertar nodo\n\n" +
+                            "9. Cerrar grafo (si está abierto)\n" +
                             "0. Volver a la creación de grafos"
             ));
         }
@@ -78,7 +82,7 @@ public class MenuGrafos {
         return opcionUsuario;
     }
 
-    public static void menuGrafos(Grafos grafo) {
+    public static void menuGrafos(Grafos grafo) throws Exception {
         
         int opcion = 0;
         do {
@@ -97,7 +101,26 @@ public class MenuGrafos {
                 case 4:
                     grafo.mostrarMatInc();
                     break;
+                case 5:
+                    grafo.DFS();
+                    break;
+                case 6:
+                    grafo.BFS();
+                    break;
+                case 7:
+                    grafo.insertarNodo();
+                    break;
+                case 8:
+                    grafo.eliminarNodo();
+                    break;
+                case 9:
+                    grafo.Djikstra();
+                    break;
+                case -1:
+                    grafo.getVentana().dispose(); // cierra el grafo que estuviese abierto
+                    break;
                 case 0:
+                    grafo.getVentana().dispose(); // cierra el grafo que estuviese abierto
                     break;
                 default:
                     System.out.println("Opción inválida");

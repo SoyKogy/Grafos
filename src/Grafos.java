@@ -1,4 +1,7 @@
 import javax.swing.JOptionPane;
+import javax.swing.JScrollPane;
+import javax.swing.JLabel;
+import javax.swing.JFrame;
 
 public class Grafos {
 
@@ -8,6 +11,7 @@ public class Grafos {
     private Nodo[] puntaListaAdy;
     private int tipo; // 1 = grafo simple no dirigido, 2 = grafo simple dirigido
     
+    private JFrame ventana;
 
     // constructor
 
@@ -63,6 +67,10 @@ public class Grafos {
 
     public void setTipo(int tipo) {
         this.tipo = tipo;
+    }
+
+    public JFrame getVentana() {
+        return ventana;
     }
 
     // métodos
@@ -395,9 +403,43 @@ public class Grafos {
         this.setPuntaListAdy(listaAdy);
     }
 
+    public void DFS() {
+        // todo
+    }
+
+    public void BFS() {
+        // todo
+    }
+
+    public void insertarNodo() {
+        // todo
+    }
+
+    public void eliminarNodo() {
+        // todo
+    }
+    
+    public void Djikstra() {
+        // todo
+    }
     // mostrados
 
-    public void mostrarGrafo() {
+    public void mostrarGrafo() throws Exception {
+
+        // visualizador de grafos basado en la librería graphviz-java
+
+        // la jerarquia es:
+        JLabel etiqueta = new JLabel("Imagen");
+        JScrollPane scroll = new JScrollPane(etiqueta);
+        ventana = new JFrame("Visualizador");
+
+        ventana.add(scroll); // se agrega el scroll (que contiene la label dela imagen) a la ventana
+        ventana.setSize(800, 600); // se le da tamaño a la ventana
+        ventana.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); // se establece que se cierre por completo al cerrar.
+                                                                // * por defecto esta en HIDE_ON_CLOSE
+        ventana.setVisible(true); // se hace visible (por defecto, las ventanas en Swing nacen ocultas)
+
+
         if (tipo == 1) {
 
         }
