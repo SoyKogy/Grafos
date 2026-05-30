@@ -521,6 +521,11 @@ public class Grafos {
         }
 
         JScrollPane scroll = new JScrollPane(etiqueta);
+
+        if (ventana != null) {
+            ventana.dispose(); // cierra la ventana que haya abierta
+        }
+        
         ventana = new JFrame("Visualizador");
 
         
