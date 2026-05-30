@@ -1,7 +1,15 @@
 import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JLabel;
+import javax.swing.ImageIcon;
 import javax.swing.JFrame;
+
+import org.graphper.api.Graphviz;
+import org.graphper.api.Node;
+import org.graphper.api.Line;
+import org.graphper.api.attributes.NodeShapeEnum;
+import org.graphper.api.attributes.Color;
+import org.graphper.api.FileType;
 
 public class Grafos {
 
@@ -12,6 +20,8 @@ public class Grafos {
     private int tipo; // 1 = grafo simple no dirigido, 2 = grafo simple dirigido
     
     private JFrame ventana;
+    private JLabel etiqueta;
+
 
     // constructor
 
@@ -21,6 +31,7 @@ public class Grafos {
         this.matrizIncidencia = null;
         this.puntaListaAdy = null;
         this.tipo = tipo;
+        this.etiqueta = new JLabel();
     }
 
     // getters y setters
@@ -73,6 +84,7 @@ public class Grafos {
         return ventana;
     }
 
+
     // métodos
 
     public static Grafos crearGrafo(String[] nodos, int tipo) {
@@ -107,7 +119,7 @@ public class Grafos {
                 boolean tieneTodas = true;  
                 String conexionesString;
 
-                for (int j = 0; j < nodos.length; j++) {
+                for (int j = 0; j < nodos.length && tieneTodas == true; j++) {
                     if (i != j) {
                         if (grafo.getMatrizAdyacencia()[i][j] != 1) {
                             tieneTodas = false;
@@ -119,7 +131,8 @@ public class Grafos {
                     do {
                         conexionesString = JOptionPane.showInputDialog(grafo.mostrarConexionesDeNodo(i) + "\n\nIngrese con qué nodos estará conectado el nodo \""
                                                                         + nodos[i] + "\", separados por comas.\n\n");
-                        
+                        /* no se maneja NullPointerException por mero capricho mio
+                         */
                         conexiones = conexionesString.split(",");
                         entradaValida = true;
 
@@ -129,61 +142,62 @@ public class Grafos {
                         */
 
                         // si no se ingresa nada
-                        if (conexionesString.isEmpty()) {
-                            JOptionPane.showMessageDialog(null, "Error: Debe ingresar al menos un nodo.");
-                            entradaValida = false;
-                        }
-
-                        // si se ingresan comas sin nodos entre ellas
-                        for (int j = 0; j < conexiones.length && entradaValida; j++) {
-                            if (conexiones[j].isEmpty()) {
-                                JOptionPane.showMessageDialog(null, "Error: Hay comas sin nodo entre ellas. Ingrese solo nodos válidos.");
-                                entradaValida = false;
-                            }
-                        }
-
-                        // si el nodo se conecta consigo mismo
-                        for (int j = 0; j < conexiones.length && entradaValida; j++) {
-                            if (conexiones[j].equals(nodos[i])) {
-                                JOptionPane.showMessageDialog(null, "Error: El nodo \"" + nodos[i] + "\" no puede conectarse consigo mismo.");
-                                entradaValida = false;
-                            }
-                        }
-
-                        // si se ingresan nodos repetidos
-                        if (entradaValida && MenuGrafos.verificarNodosRepetidos(conexiones)) {
-                            entradaValida = false;
-                        }
-
-                        if (entradaValida) {
-
-                            // si ya existe una arista entre el nodo actual y alguno de los nodos ingresados
+                        if (!conexionesString.isEmpty()) {
+                            // si se ingresan comas sin nodos entre ellas
                             for (int j = 0; j < conexiones.length && entradaValida; j++) {
-                                for (int k = 0; k < nodos.length && entradaValida; k++) {
-                                    if (conexiones[j].equals(nodos[k]) && grafo.getMatrizAdyacencia()[i][k] == 1) {
-                                        JOptionPane.showMessageDialog(null, "Error: Ya existe una arista entre \"" + nodos[i] + "\" y \"" + nodos[k] + "\".");
-                                        entradaValida = false;
+                                if (conexiones[j].isEmpty() || conexiones[j].isBlank()) {
+                                    JOptionPane.showMessageDialog(null, "Error: Hay comas sin nodo entre ellas. Ingrese solo nodos válidos.");
+                                    entradaValida = false;
+                                }
+                            }
+
+                            // si el nodo se conecta consigo mismo
+                            for (int j = 0; j < conexiones.length && entradaValida; j++) {
+                                if (conexiones[j].equals(nodos[i])) {
+                                    JOptionPane.showMessageDialog(null, "Error: El nodo \"" + nodos[i] + "\" no puede conectarse consigo mismo.");
+                                    entradaValida = false;
+                                }
+                            }
+
+                            // si se ingresan nodos repetidos
+                            if (entradaValida && MenuGrafos.verificarNodosRepetidos(conexiones)) {
+                                entradaValida = false;
+                            }
+
+                            if (entradaValida) {
+
+                                // si ya existe una arista entre el nodo actual y alguno de los nodos ingresados
+                                for (int j = 0; j < conexiones.length && entradaValida; j++) {
+                                    for (int k = 0; k < nodos.length && entradaValida; k++) {
+                                        if (conexiones[j].equals(nodos[k]) && grafo.getMatrizAdyacencia()[i][k] == 1) {
+                                            JOptionPane.showMessageDialog(null, "Error: Ya existe una arista entre \"" + nodos[i] + "\" y \"" + nodos[k] + "\".");
+                                            entradaValida = false;
+                                        }
                                     }
                                 }
                             }
-                        }
 
-                        // si se ingresan nodos que no existen en el grafo
-                        if (entradaValida) {
-                            entradaValida = verificarSiTodosLosNodosExisten(conexiones, nodos);
+                            // si se ingresan nodos que no existen en el grafo
+                            if (entradaValida) {
+                                entradaValida = verificarSiTodosLosNodosExisten(conexiones, nodos);
+                            }
                         }
 
                     } while (entradaValida == false);
 
                     // si pasaron todas las validaciones, se llena la matriz de adyacencia
-                    for (int j = 0; j < conexiones.length; j++) {
-                        for (int k = 0; k < nodos.length; k++) {
-                            if (conexiones[j].equals(nodos[k])) { // si se encuentra el nodo ingresado entre los nodos del grafo
-                                grafo.setMatrizAdyacencia(i, k, 1);
-                                grafo.setMatrizAdyacencia(k, i, 1);
+
+                    if (!conexionesString.isEmpty()) {
+                        for (int j = 0; j < conexiones.length; j++) {
+                            for (int k = 0; k < nodos.length; k++) {
+                                if (conexiones[j].equals(nodos[k])) { // si se encuentra el nodo ingresado entre los nodos del grafo
+                                    grafo.setMatrizAdyacencia(i, k, 1);
+                                    grafo.setMatrizAdyacencia(k, i, 1);
+                                }
                             }
                         }
                     }
+                    
                 } else {
                     JOptionPane.showMessageDialog(null, "El nodo \"" + nodos[i] + "\" ya tiene conexiones con todos los demás nodos.\nSe procederá al siguiente nodo.");
                 }
@@ -223,7 +237,7 @@ public class Grafos {
                 boolean tieneTodas = true;  
                 String conexionesString;
 
-                for (int j = 0; j < nodos.length; j++) {
+                for (int j = 0; j < nodos.length && tieneTodas == true; j++) {
                     if (grafo.getMatrizAdyacencia()[i][j] != 1) {
                             tieneTodas = false;
                     }
@@ -243,63 +257,65 @@ public class Grafos {
                         */
 
                         // si no se ingresa nada
-                        if (conexionesString.isEmpty()) {
-                            JOptionPane.showMessageDialog(null, "Error: Debe ingresar al menos un nodo.");
-                            entradaValida = false;
-                        }
-
-                        // si se ingresan comas sin nodos entre ellas
-                        for (int j = 0; j < conexiones.length && entradaValida; j++) {
-                            if (conexiones[j].isEmpty() || conexiones[j].isBlank()) {
-                                JOptionPane.showMessageDialog(null, "Error: Hay comas sin nodo entre ellas. Ingrese solo nodos válidos.");
-                                entradaValida = false;
-                            }
-                        }
-
-                        // si el nodo se conecta consigo mismo
-                        /*
-                        for (int j = 0; j < conexiones.length && entradaValida; j++) {
-                            if (conexiones[j].equals(nodos[i])) {
-                                JOptionPane.showMessageDialog(null, "Error: El nodo \"" + nodos[i] + "\" no puede conectarse consigo mismo.");
-                                entradaValida = false;
-                            }
-                        }
-                        */
-
-                        // si se ingresan nodos repetidos
-                        if (entradaValida && MenuGrafos.verificarNodosRepetidos(conexiones)) {
-                            entradaValida = false;
-                        }
-
-                        if (entradaValida) {
-
-                            // si ya existe una arista SALIENTE entre el nodo actual y alguno de los nodos ingresados
+                        if (!conexionesString.isEmpty()) {
+                            // si se ingresan comas sin nodos entre ellas
                             for (int j = 0; j < conexiones.length && entradaValida; j++) {
-                                for (int k = 0; k < nodos.length && entradaValida; k++) {
-                                    if (conexiones[j].equals(nodos[k]) && grafo.getMatrizAdyacencia()[i][k] == 1) {
-                                        JOptionPane.showMessageDialog(null, "Error: Ya existe una arista desde \"" + nodos[i] + "\" hacia \"" + nodos[k] + "\".");
-                                        entradaValida = false;
+                                if (conexiones[j].isEmpty() || conexiones[j].isBlank()) {
+                                    JOptionPane.showMessageDialog(null, "Error: Hay comas sin nodo entre ellas. Ingrese solo nodos válidos.");
+                                    entradaValida = false;
+                                }
+                            }
+
+                            // si el nodo se conecta consigo mismo
+                            /*
+                            for (int j = 0; j < conexiones.length && entradaValida; j++) {
+                                if (conexiones[j].equals(nodos[i])) {
+                                    JOptionPane.showMessageDialog(null, "Error: El nodo \"" + nodos[i] + "\" no puede conectarse consigo mismo.");
+                                    entradaValida = false;
+                                }
+                            }
+                            */
+
+                            // si se ingresan nodos repetidos
+                            if (entradaValida && MenuGrafos.verificarNodosRepetidos(conexiones)) {
+                                entradaValida = false;
+                            }
+
+                            if (entradaValida) {
+
+                                // si ya existe una arista SALIENTE entre el nodo actual y alguno de los nodos ingresados
+                                for (int j = 0; j < conexiones.length && entradaValida; j++) {
+                                    for (int k = 0; k < nodos.length && entradaValida; k++) {
+                                        if (conexiones[j].equals(nodos[k]) && grafo.getMatrizAdyacencia()[i][k] == 1) {
+                                            JOptionPane.showMessageDialog(null, "Error: Ya existe una arista desde \"" + nodos[i] + "\" hacia \"" + nodos[k] + "\".");
+                                            entradaValida = false;
+                                        }
                                     }
                                 }
                             }
+
+                            // si se ingresan nodos que no existen en el grafo
+                            if (entradaValida) {
+                                entradaValida = verificarSiTodosLosNodosExisten(conexiones, nodos);
+                            }
+
                         }
 
-                        // si se ingresan nodos que no existen en el grafo
-                        if (entradaValida) {
-                            entradaValida = verificarSiTodosLosNodosExisten(conexiones, nodos);
-                        }
-
+                        
                     } while (entradaValida == false);
 
                     // si pasaron todas las validaciones, se llena la matriz de adyacencia
-                    for (int j = 0; j < conexiones.length; j++) {
-                        for (int k = 0; k < nodos.length; k++) {
-                            if (conexiones[j].equals(nodos[k])) { // si se encuentra el nodo ingresado entre los nodos del grafo
-                                grafo.setMatrizAdyacencia(i, k, 1);
+                    
+                    if (!conexionesString.isEmpty()) {
+                        
+                        for (int j = 0; j < conexiones.length; j++) {
+                            for (int k = 0; k < nodos.length; k++) {
+                                if (conexiones[j].equals(nodos[k])) { // si se encuentra el nodo ingresado entre los nodos del grafo
+                                    grafo.setMatrizAdyacencia(i, k, 1);
+                                }
                             }
                         }
                     }
-
                 } else {
                     JOptionPane.showMessageDialog(null, "El nodo \"" + nodos[i] + "\" ya tiene salientes a cada nodo posible.\nSe procederá al siguiente nodo.");
                 }
@@ -358,6 +374,8 @@ public class Grafos {
             }
         }
 
+        this.actualizarGrafo();
+
         return nuevaMatrizInc;
     }
 
@@ -365,6 +383,8 @@ public class Grafos {
         
         // solo se pidió lista de adyacencia para grafo no dirigido
         // entonces no se pide tipo 
+        // NO se implementará para tipo = 2.
+
         Nodo[] listaAdy = new Nodo[nodos.length];
 
         for (int i = 0; i < nodos.length; i++) { // itera sobre los nodos del grafo
@@ -401,6 +421,8 @@ public class Grafos {
         }
         
         this.setPuntaListAdy(listaAdy);
+        
+        this.actualizarGrafo();
     }
 
     public void DFS() {
@@ -418,9 +440,9 @@ public class Grafos {
     public void eliminarNodo() {
         // todo
     }
-    
+
     public void Djikstra() {
-        // todo
+        // todo, codigo arboles, grafos no codiog
     }
     // mostrados
 
@@ -429,24 +451,86 @@ public class Grafos {
         // visualizador de grafos basado en la librería graphviz-java
 
         // la jerarquia es:
-        JLabel etiqueta = new JLabel("Imagen");
+        // 1. etiqueta
+        // 2. scroll
+        // 3. ventana
+
+        // Crear nodos para graphviz
+        Node[] visualNodes = new Node[nodos.length];
+
+        if (tipo == 1) {
+
+            for (int i = 0; i < nodos.length; i++) {
+                visualNodes[i] = Node.builder()
+                                    .label(nodos[i])
+                                    .shape(NodeShapeEnum.CIRCLE)
+                                    .fillColor(Color.ofRGB("#87fae3"))
+                                    .build();
+            }
+            
+            // crear grafp de clase graphviz (la que lo muestra) y
+            // subclase builder (la que lo construye de forma dinámica)
+            Graphviz.GraphvizBuilder graph = Graphviz.graph().addNode(visualNodes);
+            
+            // añadir aristas al grafo
+            for (int i = 0; i < nodos.length; i++) {
+                
+                for (int j = i + 1; j < nodos.length; j++) {
+                    if (matrizAdyacencia[i][j] == 1) {
+                        graph.addLine(visualNodes[i], visualNodes[j]);
+                    }
+                }                
+            }
+            
+            Graphviz finalGraph = graph.build();
+            
+            // Save as PNG
+            finalGraph.toFile(FileType.PNG).save("./", "no-dirigido");
+            
+
+        }
+
+        if (tipo == 2) {
+            for (int i = 0; i < nodos.length; i++) {
+                visualNodes[i] = Node.builder()
+                                    .label(nodos[i])
+                                    .shape(NodeShapeEnum.CIRCLE)
+                                    .fillColor(Color.ofRGB("#87fae3")).build();
+                                    
+            }
+            
+            // crear grafp de clase graphviz (la que lo muestra) y
+            // subclase builder (la que lo construye de forma dinámica)
+            Graphviz.GraphvizBuilder digraph = Graphviz.digraph().addNode(visualNodes);
+            
+            // añadir aristas al grafo
+            for (int i = 0; i < nodos.length; i++) {
+                
+                for (int j = 0; j < nodos.length; j++) {
+                    if (matrizAdyacencia[i][j] == 1) {
+                        digraph.addLine(visualNodes[i], visualNodes[j]);
+                    }
+                }                
+            }
+            
+            Graphviz finalGraph = digraph.build();
+            
+            // Save as PNG
+            finalGraph.toFile(FileType.PNG).save("./", "dirigido");
+            
+        }
+
         JScrollPane scroll = new JScrollPane(etiqueta);
         ventana = new JFrame("Visualizador");
 
+        
         ventana.add(scroll); // se agrega el scroll (que contiene la label dela imagen) a la ventana
         ventana.setSize(800, 600); // se le da tamaño a la ventana
         ventana.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); // se establece que se cierre por completo al cerrar.
                                                                 // * por defecto esta en HIDE_ON_CLOSE
         ventana.setVisible(true); // se hace visible (por defecto, las ventanas en Swing nacen ocultas)
-
-
-        if (tipo == 1) {
-
-        }
-
-        if (tipo == 2) {
-
-        }
+        
+        actualizarGrafo(); // se asigna la imagen del grafo a la etiqueta, y se muestra en la ventana
     }
 
     public void mostrarMatAdy() {
@@ -477,7 +561,7 @@ public class Grafos {
         
         StringBuilder listaString = new StringBuilder("Lista de adyacencia:\n\n");
 
-        // solo esta diseñada para grafo tipo 1 (simple no dirigido)
+        // solo esta diseñada para grafo tipo 1 (simple no dirigido). NO se piensa implementar para tipo 2.
 
         Nodo nodoActual = null;
         for (int i = 0; i < nodos.length; i++) {
@@ -530,6 +614,16 @@ public class Grafos {
 
     // metodos helpers
  
+    public void actualizarGrafo() {
+        if (tipo == 1) {
+            etiqueta.setIcon(new ImageIcon("./no-dirigido.png"));
+        }
+
+        if (tipo == 2) {
+            etiqueta.setIcon(new ImageIcon("./dirigido.png"));
+        }
+    }
+     
     public String mostrarConexionesDeNodo(int indiceNodo) {
 
         StringBuilder conexiones = new StringBuilder();

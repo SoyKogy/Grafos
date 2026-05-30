@@ -72,9 +72,11 @@ public class MenuGrafos {
                             "3. Mostrar lista de adyacencia\n" +
                             "4. Mostrar matriz de incidencia\n\n" +
                             "5. Recorrido DFS\n" +
-                            "6. Recorrido BFS\n" +
-                            "7. Insertar nodo\n\n" +
-                            "9. Cerrar grafo (si está abierto)\n" +
+                            "6. Recorrido BFS\n\n" +
+                            "7. Insertar nodo\n" +
+                            "8. Eliminar nodo\n" +
+                            "9. Algoritmo de Dijkstra\n\n" +
+                            "-1. Cerrar grafo (si está abierto)\n" +
                             "0. Volver a la creación de grafos"
             ));
         }
