@@ -426,8 +426,38 @@ public class Grafos {
         this.mostrarGrafo(false); // refresca solo si ya existe una versión visual del grafo
     }
 
-    public void DFS() {
-        // todo
+    public void DFS() {  
+
+        boolean[] visitados = new boolean[nodos.length];
+        StringBuilder resultado = new StringBuilder();
+        
+        // recorrer todos los nodos, por si el grafo no es conexo
+        for (int i = 0; i < nodos.length; i++) {
+            if (!visitados[i]) {
+                DFSrecursivo(visitados, i, resultado);
+            }
+        }
+        
+        JOptionPane.showMessageDialog(null, "Resultado: " + resultado);
+
+    }
+
+    public void DFSrecursivo(boolean[] visitado, int indiceNodoActual, StringBuilder res) {
+        visitado[indiceNodoActual] = true;
+
+        if (!res.isEmpty()) {
+            res.append(", ");
+        }
+        res.append(nodos[indiceNodoActual]);
+
+        // visitar recursivamente los nodos que aún no han sido visitados
+
+        // para cada columna de la fila del nodo actual
+        for (int i = 0; i < this.matrizAdyacencia[0].length; i++) {
+            if (this.matrizAdyacencia[indiceNodoActual][i] == 1 && !visitado[i]) {
+                DFSrecursivo(visitado, i, res);
+            }
+        }
     }
 
     public void BFS() {
@@ -549,8 +579,77 @@ public class Grafos {
         }
     }
 
-    public void eliminarNodo() {
-        // todo
+    public void eliminarNodo() throws Exception {
+
+        // no se permite dejar el grafo sin nodos
+        if (nodos.length == 1) {
+            JOptionPane.showMessageDialog(null, "Error: No se puede eliminar el último nodo del grafo.");
+            return;
+        }
+
+        boolean nodoValido = true;
+        String nodoAEliminar = "";
+        StringBuilder nodosDisponibles = new StringBuilder("Nodos disponibles:\n");
+
+        for (int i = 0; i < nodos.length; i++) {
+            nodosDisponibles.append(nodos[i]).append("\n");
+        }
+
+        do {
+            nodoValido = true;
+            nodoAEliminar = JOptionPane.showInputDialog(nodosDisponibles + "\nIngrese el nombre del nodo a eliminar:\n\nIngrese 0 para regresar.");
+
+            // si no se ingresó nada
+            if (nodoAEliminar.isEmpty() || nodoAEliminar.isBlank()) {
+                JOptionPane.showMessageDialog(null, "Error: debe ingresar un nodo.");
+                nodoValido = false;
+            }
+
+            // si el nodo ingresado no existe
+            if (nodoValido && !nodoAEliminar.equals("0") && buscarIndiceNodo(nodoAEliminar) == -1) {
+                JOptionPane.showMessageDialog(null, "Error: " + nodoAEliminar + " no existe en el grafo.");
+                nodoValido = false;
+            }
+
+        } while (nodoValido == false);
+
+        if (!nodoAEliminar.equals("0")) {
+
+            int indiceEliminado = buscarIndiceNodo(nodoAEliminar);
+            String[] nuevosNodos = new String[nodos.length - 1];
+            int[][] nuevaMatAdy = new int[matrizAdyacencia.length - 1][matrizAdyacencia.length - 1];
+
+            // llenar el nuevo arreglo de índice de nodos
+            for (int i = 0, k = 0; i < nodos.length; i++) {
+                if (i != indiceEliminado) {
+                    nuevosNodos[k] = nodos[i];
+                    k++;
+                }
+            }
+
+            // llenar la nueva matriz de adyacencia, omitiendo fila y columna del nodo eliminado
+            for (int i = 0, filaNueva = 0; i < matrizAdyacencia.length; i++) {
+                if (i != indiceEliminado) {
+                    for (int j = 0, colNueva = 0; j < matrizAdyacencia[0].length; j++) {
+                        if (j != indiceEliminado) {
+                            nuevaMatAdy[filaNueva][colNueva] = matrizAdyacencia[i][j];
+                            colNueva++;
+                        }
+                    }
+                    filaNueva++;
+                }
+            }
+
+            nodos = nuevosNodos;
+            setMatrizAdyacencia(nuevaMatAdy);
+            setMatrizIncidencia(updateMatrizInc());
+
+            if (tipo != 2) {
+                llenarListaAdy();
+            }
+
+            mostrarGrafo(true);
+        }
     }
 
     public void Djikstra() {
@@ -920,5 +1019,18 @@ public class Grafos {
 
 
         return repetido;
+    }
+
+    public int buscarIndiceNodo(String nombreNodo) {
+
+        int indice = -1;
+
+        for (int i = 0; i < nodos.length && indice == -1; i++) {
+            if (nodos[i].equals(nombreNodo)) {
+                indice = i;
+            }
+        }
+
+        return indice;
     }
 }
