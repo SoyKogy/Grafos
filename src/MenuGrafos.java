@@ -92,7 +92,7 @@ public class MenuGrafos {
                 switch(opcion) {
                 
                 case 1:
-                    grafo.mostrarGrafo();
+                    grafo.mostrarGrafo(true);
                     break;
                 case 2:
                     grafo.mostrarMatAdy();

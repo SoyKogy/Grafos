@@ -3,10 +3,10 @@ import javax.swing.JScrollPane;
 import javax.swing.JLabel;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
+import java.awt.Dimension;
 
 import org.graphper.api.Graphviz;
 import org.graphper.api.Node;
-import org.graphper.api.Line;
 import org.graphper.api.attributes.NodeShapeEnum;
 import org.graphper.api.attributes.Color;
 import org.graphper.api.FileType;
@@ -21,7 +21,7 @@ public class Grafos {
     
     private JFrame ventana;
     private JLabel etiqueta;
-
+    private Graphviz visualGrafo;
 
     // constructor
 
@@ -32,6 +32,7 @@ public class Grafos {
         this.puntaListaAdy = null;
         this.tipo = tipo;
         this.etiqueta = new JLabel();
+        this.visualGrafo = null;
     }
 
     // getters y setters
@@ -83,11 +84,11 @@ public class Grafos {
     public JFrame getVentana() {
         return ventana;
     }
-
+    
 
     // métodos
 
-    public static Grafos crearGrafo(String[] nodos, int tipo) {
+    public static Grafos crearGrafo(String[] nodos, int tipo) throws Exception {
 
         Grafos grafo = new Grafos(nodos, tipo);
         /* tipo 1 = grafo simple no dirigido */
@@ -332,7 +333,7 @@ public class Grafos {
         return grafo;
     }
 
-    public int[][] updateMatrizInc() {
+    public int[][] updateMatrizInc() throws Exception {
 
         int aristas = this.contarAristas();
 
@@ -374,12 +375,12 @@ public class Grafos {
             }
         }
 
-        this.actualizarGrafo();
+        this.mostrarGrafo(false); // refresca solo si ya existe una versión visual del grafo
 
         return nuevaMatrizInc;
     }
 
-    public void llenarListaAdy() {
+    public void llenarListaAdy() throws Exception {
         
         // solo se pidió lista de adyacencia para grafo no dirigido
         // entonces no se pide tipo 
@@ -422,7 +423,7 @@ public class Grafos {
         
         this.setPuntaListAdy(listaAdy);
         
-        this.actualizarGrafo();
+        this.mostrarGrafo(false); // refresca solo si ya existe una versión visual del grafo
     }
 
     public void DFS() {
@@ -433,8 +434,119 @@ public class Grafos {
         // todo
     }
 
-    public void insertarNodo() {
-        // todo
+    public void insertarNodo() throws Exception {
+
+        boolean nodoValido = true;
+        String nuevoNodo = "";
+        do {
+            nodoValido = true;
+            nuevoNodo = JOptionPane.showInputDialog("Ingrese el nombre del nuevo nodo:\n\nIngrese 0 para regresar.");
+            
+            // si no se ingresó nada
+            if (nuevoNodo.isEmpty() || nuevoNodo.isBlank()) {
+                JOptionPane.showMessageDialog(null, "Error: debe ingresar un nodo.");
+                nodoValido = false;
+            }
+
+            // si el nodo ingresado ya existe
+            if (nodoYaExiste(nuevoNodo) == true && nodoValido == true) {
+                JOptionPane.showMessageDialog(null, "Error: "+nuevoNodo+" ya existe en el grafo.");
+                nodoValido = false;
+            }
+
+
+        } while (nodoValido == false);
+
+        if (!nuevoNodo.equals("0")) {
+
+
+            boolean salientesValidos = true;
+            String salientes;
+            String[] nuevosSalientes = new String[0]; 
+
+            do {
+                salientesValidos = true;
+                salientes = JOptionPane.showInputDialog("Ingrese a qué otros nodos conectar aristas, separados por comas.\n\nPuede dejar en blanco para dejar el nodo aislado.");
+                
+                if (!salientes.isEmpty() && !salientes.isBlank()) {
+                    nuevosSalientes = salientes.split(",");
+
+                    // si se ingresan comas sin nodos entre ellas
+                    for (int j = 0; j < nuevosSalientes.length && salientesValidos; j++) {
+                        if (nuevosSalientes[j].isEmpty() || nuevosSalientes[j].isBlank()) {
+                            JOptionPane.showMessageDialog(null, "Error: Hay comas sin nodo entre ellas. Ingrese solo nodos válidos.");
+                            salientesValidos = false;
+                        }
+                    }
+
+                    // si se ingresan nodos repetidos
+                    if (salientesValidos && MenuGrafos.verificarNodosRepetidos(nuevosSalientes)) {
+                        salientesValidos = false;
+                    }
+
+                    // si es un grafo no dirigido, y se ingresó a sí mismo como arista saliente
+                    for (int j = 0; j < nuevosSalientes.length && salientesValidos && tipo == 1; j++) {
+                        if (nuevosSalientes[j].equals(nuevoNodo)) {
+                            JOptionPane.showMessageDialog(null, "Error: No puede ingresar al mismo nodo para un grafo no dirigido.");
+                            salientesValidos = false;
+                        }
+                    }
+
+                    // si se ingresan nodos que no existen en el grafo
+                    if (salientesValidos) {
+                        salientesValidos = verificarSiTodosLosNodosExisten(nuevosSalientes, nodos);
+                    }
+                }
+            } while (salientesValidos == false);
+            
+            
+            
+            int[][] nuevaMatAdy = new int[matrizAdyacencia.length + 1][matrizAdyacencia.length + 1];
+            String[] nuevoNodos = new String[nodos.length + 1];
+
+            nuevoNodos[nuevoNodos.length - 1] = nuevoNodo;
+            // llenar nueva matriz con datos viejos
+            for (int i = 0; i < matrizAdyacencia.length; i++) {
+                for (int j = 0; j < matrizAdyacencia[0].length; j++) {
+                    if (matrizAdyacencia[i][j] != 0) {
+                        nuevaMatAdy[i][j] = matrizAdyacencia[i][j];
+                    }
+                }
+            }
+
+            
+            // añadirle a la mat ady los nuevos valores
+            if (!salientes.isEmpty() && !salientes.isBlank()) {
+                for (int i = 0; i < nuevosSalientes.length; i++) {
+                    for (int j = 0; j < nodos.length; j++) {
+                        if (nuevosSalientes[i].equals(nodos[j])) { // si se encuentra el nodo ingresado entre los nodos del grafo
+                            nuevaMatAdy[nuevaMatAdy.length - 1][j] = 1;
+
+                            if (tipo == 1) {
+                                nuevaMatAdy[j][nuevaMatAdy.length - 1] = 1;
+                            }
+                            
+                        }
+                    }
+                }
+            }
+
+            // llenar el nuevo arreglo de índice de nodos
+            for (int i = 0; i < nodos.length; i++) {
+                nuevoNodos[i] = nodos[i];
+            }
+            nodos = nuevoNodos;
+
+            setMatrizAdyacencia(nuevaMatAdy);
+            setMatrizIncidencia(updateMatrizInc());
+
+            if (tipo != 2) {
+                llenarListaAdy();
+            }
+            
+            mostrarGrafo(true);
+
+        }
     }
 
     public void eliminarNodo() {
@@ -446,7 +558,7 @@ public class Grafos {
     }
     // mostrados
 
-    public void mostrarGrafo() throws Exception {
+    public void mostrarGrafo(Boolean crearNuevoGrafo) throws Exception {
 
         // visualizador de grafos basado en la librería graphviz-java
 
@@ -455,72 +567,76 @@ public class Grafos {
         // 2. scroll
         // 3. ventana
 
-        // Crear nodos para graphviz
-        Node[] visualNodes = new Node[nodos.length];
-
-        if (tipo == 1) {
-
-            for (int i = 0; i < nodos.length; i++) {
-                visualNodes[i] = Node.builder()
-                                    .label(nodos[i])
-                                    .shape(NodeShapeEnum.CIRCLE)
-                                    .fillColor(Color.ofRGB("#87fae3"))
-                                    .build();
-            }
+        if (crearNuevoGrafo) { // solo reconstruye visualGrafo cuando cambió la estructura del grafo
+            // Crear nodos para graphviz
+            Node[] visualNodes = new Node[nodos.length];
             
-            // crear grafp de clase graphviz (la que lo muestra) y
-            // subclase builder (la que lo construye de forma dinámica)
-            Graphviz.GraphvizBuilder graph = Graphviz.graph().addNode(visualNodes);
-            
-            // añadir aristas al grafo
-            for (int i = 0; i < nodos.length; i++) {
+            if (tipo == 1) {
+
+                for (int i = 0; i < nodos.length; i++) {
+                    visualNodes[i] = Node.builder()
+                                        .label(nodos[i])
+                                        .shape(NodeShapeEnum.CIRCLE)
+                                        .fillColor(Color.ofRGB("#87fae3"))
+                                        .build();
+                }
                 
-                for (int j = i + 1; j < nodos.length; j++) {
-                    if (matrizAdyacencia[i][j] == 1) {
-                        graph.addLine(visualNodes[i], visualNodes[j]);
-                    }
-                }                
-            }
-            
-            Graphviz finalGraph = graph.build();
-            
-            // Save as PNG
-            finalGraph.toFile(FileType.PNG).save("./", "no-dirigido");
-            
+                // crear grafp de clase graphviz (la que lo muestra) y
+                // subclase builder (la que lo construye de forma dinámica)
+                Graphviz.GraphvizBuilder graph = Graphviz.graph().addNode(visualNodes);
+                
+                // añadir aristas al grafo
+                for (int i = 0; i < nodos.length; i++) {
+                    
+                    for (int j = i + 1; j < nodos.length; j++) {
+                        if (matrizAdyacencia[i][j] == 1) {
+                            graph.addLine(visualNodes[i], visualNodes[j]);
+                        }
+                    }                
+                }
+                
+                visualGrafo = graph.build();
 
+            }
+
+            if (tipo == 2) {
+                for (int i = 0; i < nodos.length; i++) {
+                    visualNodes[i] = Node.builder()
+                                        .label(nodos[i])
+                                        .shape(NodeShapeEnum.CIRCLE)
+                                        .fillColor(Color.ofRGB("#87fae3")).build();
+                                        
+                }
+                
+                // crear grafp de clase graphviz (la que lo muestra) y
+                // subclase builder (la que lo construye de forma dinámica)
+                Graphviz.GraphvizBuilder digraph = Graphviz.digraph().addNode(visualNodes);
+                
+                // añadir aristas al grafo
+                for (int i = 0; i < nodos.length; i++) {
+                    
+                    for (int j = 0; j < nodos.length; j++) {
+                        if (matrizAdyacencia[i][j] == 1) {
+                            digraph.addLine(visualNodes[i], visualNodes[j]);
+                        }
+                    }                
+                }
+                
+                visualGrafo = digraph.build();
+            }
         }
 
-        if (tipo == 2) {
-            for (int i = 0; i < nodos.length; i++) {
-                visualNodes[i] = Node.builder()
-                                    .label(nodos[i])
-                                    .shape(NodeShapeEnum.CIRCLE)
-                                    .fillColor(Color.ofRGB("#87fae3")).build();
-                                    
-            }
-            
-            // crear grafp de clase graphviz (la que lo muestra) y
-            // subclase builder (la que lo construye de forma dinámica)
-            Graphviz.GraphvizBuilder digraph = Graphviz.digraph().addNode(visualNodes);
-            
-            // añadir aristas al grafo
-            for (int i = 0; i < nodos.length; i++) {
-                
-                for (int j = 0; j < nodos.length; j++) {
-                    if (matrizAdyacencia[i][j] == 1) {
-                        digraph.addLine(visualNodes[i], visualNodes[j]);
-                    }
-                }                
-            }
-            
-            Graphviz finalGraph = digraph.build();
-            
-            // Save as PNG
-            finalGraph.toFile(FileType.PNG).save("./", "dirigido");
-            
+        if (visualGrafo == null) { // evita refrescar o guardar antes de haber construido el grafo visual
+            return;
+        }
+
+        if (!crearNuevoGrafo) { // si no se pidió reconstrucción, solo actualiza la imagen actual
+            actualizarGrafo();
+            return;
         }
 
         JScrollPane scroll = new JScrollPane(etiqueta);
+        scroll.setPreferredSize(new Dimension(800, 600));
 
         if (ventana != null) {
             ventana.dispose(); // cierra la ventana que haya abierta
@@ -530,7 +646,7 @@ public class Grafos {
 
         
         ventana.add(scroll); // se agrega el scroll (que contiene la label dela imagen) a la ventana
-        ventana.setSize(800, 600); // se le da tamaño a la ventana
+        ventana.pack(); // toma el tamaño preferido del scroll
         ventana.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); // se establece que se cierre por completo al cerrar.
                                                                 // * por defecto esta en HIDE_ON_CLOSE
         ventana.setVisible(true); // se hace visible (por defecto, las ventanas en Swing nacen ocultas)
@@ -587,7 +703,7 @@ public class Grafos {
         JOptionPane.showMessageDialog(null, listaString);
     }
 
-    public void mostrarMatInc() {
+    public void mostrarMatInc() throws Exception {
 
         this.setMatrizIncidencia(updateMatrizInc()); //actualizar matriz
 
@@ -619,12 +735,16 @@ public class Grafos {
 
     // metodos helpers
  
-    public void actualizarGrafo() {
+    public void actualizarGrafo() throws Exception {
         if (tipo == 1) {
+            // Save as PNG
+            visualGrafo.toFile(FileType.PNG).save("./", "no-dirigido");
             etiqueta.setIcon(new ImageIcon("./no-dirigido.png"));
         }
 
         if (tipo == 2) {
+            // Save as PNG
+            visualGrafo.toFile(FileType.PNG).save("./", "dirigido");
             etiqueta.setIcon(new ImageIcon("./dirigido.png"));
         }
     }
@@ -788,5 +908,17 @@ public class Grafos {
         return aristas;
     }
 
+    public Boolean nodoYaExiste (String nuevoNodo) {
 
+        boolean repetido = false;
+
+        for (int i = 0; i < nodos.length && repetido == false; i++) {
+            if (nodos[i].equals(nuevoNodo)) {
+                repetido = true;
+            }
+        }
+
+
+        return repetido;
+    }
 }
