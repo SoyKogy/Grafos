@@ -4,6 +4,8 @@ import javax.swing.JLabel;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import java.awt.Dimension;
+import java.util.Queue;
+import java.util.LinkedList;
 
 import org.graphper.api.Graphviz;
 import org.graphper.api.Node;
@@ -428,40 +430,66 @@ public class Grafos {
 
     public void DFS() {  
 
-        boolean[] visitados = new boolean[nodos.length];
-        StringBuilder resultado = new StringBuilder();
+        boolean[] visitados = new boolean[nodos.length]; // arreglo para marcar los nodos ya visitados
+        StringBuilder resultado = new StringBuilder(); // guarda el recorrido DFS en orden de visita
         
         // recorrer todos los nodos, por si el grafo no es conexo
         for (int i = 0; i < nodos.length; i++) {
-            if (!visitados[i]) {
-                DFSrecursivo(visitados, i, resultado);
+            if (!visitados[i]) { // si el nodo actual aún no ha sido visitado
+                DFSrecursivo(visitados, i, resultado); // iniciar DFS desde ese nodo
             }
         }
         
-        JOptionPane.showMessageDialog(null, "Resultado: " + resultado);
+        JOptionPane.showMessageDialog(null, "Resultado: " + resultado); // mostrar el recorrido final
 
     }
 
     public void DFSrecursivo(boolean[] visitado, int indiceNodoActual, StringBuilder res) {
-        visitado[indiceNodoActual] = true;
+        visitado[indiceNodoActual] = true; // marcar como visitado el nodo actual
 
-        if (!res.isEmpty()) {
-            res.append(", ");
+        if (!res.isEmpty()) { // si ya hay nodos en el recorrido
+            res.append(", "); // separar con coma el siguiente nodo
         }
-        res.append(nodos[indiceNodoActual]);
+        res.append(nodos[indiceNodoActual]); // agregar el nodo actual al recorrido
 
         // visitar recursivamente los nodos que aún no han sido visitados
 
         // para cada columna de la fila del nodo actual
         for (int i = 0; i < this.matrizAdyacencia[0].length; i++) {
-            if (this.matrizAdyacencia[indiceNodoActual][i] == 1 && !visitado[i]) {
-                DFSrecursivo(visitado, i, res);
+            if (this.matrizAdyacencia[indiceNodoActual][i] == 1 && !visitado[i]) { // si hay arista y el nodo no ha sido visitado
+                DFSrecursivo(visitado, i, res); // visitar recursivamente el nodo adyacente
             }
         }
     }
 
     public void BFS() {
-        // todo
+
+        boolean[] visitados = new boolean[nodos.length];
+        StringBuilder resultado = new StringBuilder();
+
+        int src = 0;
+        Queue<Integer> cola = new LinkedList<>();
+        visitados[src] = true;
+        cola.add(src);
+
+        while (!cola.isEmpty()) {
+            int actual = cola.poll();
+
+            if (!resultado.isEmpty()) {
+                resultado.append(", ");
+            }
+            resultado.append(nodos[actual]);
+
+            // visitar los nodos adyacentes no visitados del nodo actual
+            for (int i = 0; i < this.matrizAdyacencia[0].length; i++) {
+                if (this.matrizAdyacencia[actual][i] == 1 && !visitados[i]) {
+                    visitados[i] = true;
+                    cola.add(i);
+                }
+            }
+        }
+
+        JOptionPane.showMessageDialog(null, "Resultado: " + resultado);
     }
 
     public void insertarNodo() throws Exception {
