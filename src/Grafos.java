@@ -24,6 +24,7 @@ public class Grafos {
     private JFrame ventana;
     private JLabel etiqueta;
     private Graphviz visualGrafo;
+    private int versionImagen;
 
     // constructor
 
@@ -36,6 +37,7 @@ public class Grafos {
         this.tipo = tipo;
         this.etiqueta = new JLabel();
         this.visualGrafo = null;
+        this.versionImagen = 0;
     }
 
     // getters y setters
@@ -378,8 +380,6 @@ public class Grafos {
             }
         }
 
-        this.mostrarGrafo(false); // refresca solo si ya existe una versión visual del grafo
-
         return nuevaMatrizInc;
     }
 
@@ -426,7 +426,6 @@ public class Grafos {
         
         this.setPuntaListAdy(listaAdy);
         
-        this.mostrarGrafo(false); // refresca solo si ya existe una versión visual del grafo
     }
 
     public void DFS() {  
@@ -976,14 +975,18 @@ public class Grafos {
     public void actualizarGrafo() throws Exception {
         if (tipo == 1) {
             // Save as PNG
-            visualGrafo.toFile(FileType.PNG).save("./", "no-dirigido");
-            etiqueta.setIcon(new ImageIcon("./no-dirigido.png"));
+            versionImagen++;
+            String nombreArchivo = "no-dirigido-" + versionImagen;
+            visualGrafo.toFile(FileType.PNG).save("./", nombreArchivo);
+            etiqueta.setIcon(new ImageIcon("./" + nombreArchivo + ".png"));
         }
 
         if (tipo == 2) {
             // Save as PNG
-            visualGrafo.toFile(FileType.PNG).save("./", "dirigido");
-            etiqueta.setIcon(new ImageIcon("./dirigido.png"));
+            versionImagen++;
+            String nombreArchivo = "dirigido-" + versionImagen;
+            visualGrafo.toFile(FileType.PNG).save("./", nombreArchivo);
+            etiqueta.setIcon(new ImageIcon("./" + nombreArchivo + ".png"));
         }
 
         etiqueta.revalidate();
