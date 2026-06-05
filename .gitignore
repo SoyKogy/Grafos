@@ -11,7 +11,7 @@
 .mtj.tmp/
 
 # Package Files #
-*.jar
+
 *.war
 *.nar
 *.ear
@@ -21,6 +21,11 @@
 
 no-dirigido.png
 dirigido.png
+dirigido-1.png
+dirigido-2.png
+no-dirigido-1.png
+no-dirigido-2.png
+
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
 replay_pid*
