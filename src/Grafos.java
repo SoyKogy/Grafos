@@ -3,7 +3,6 @@ import javax.swing.JScrollPane;
 import javax.swing.JLabel;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
-import java.awt.Dimension;
 import java.util.Queue;
 import java.util.LinkedList;
 
@@ -16,6 +15,7 @@ import org.graphper.api.FileType;
 public class Grafos {
 
     private String[] nodos;
+    private int[][] pesos;
     private int[][] matrizAdyacencia;
     private int[][] matrizIncidencia;
     private Nodo[] puntaListaAdy;
@@ -29,6 +29,7 @@ public class Grafos {
 
     public Grafos(String[] nodos, int tipo) {
         this.nodos = nodos;
+        this.pesos = new int[nodos.length][nodos.length];
         this.matrizAdyacencia = new int[nodos.length][nodos.length];
         this.matrizIncidencia = null;
         this.puntaListaAdy = null;
@@ -440,7 +441,7 @@ public class Grafos {
             }
         }
         
-        JOptionPane.showMessageDialog(null, "Resultado: " + resultado); // mostrar el recorrido final
+        JOptionPane.showMessageDialog(null, "Resultado: " + resultado);
 
     }
 
@@ -455,41 +456,49 @@ public class Grafos {
         // visitar recursivamente los nodos que aún no han sido visitados
 
         // para cada columna de la fila del nodo actual
-        for (int i = 0; i < this.matrizAdyacencia[0].length; i++) {
-            if (this.matrizAdyacencia[indiceNodoActual][i] == 1 && !visitado[i]) { // si hay arista y el nodo no ha sido visitado
-                DFSrecursivo(visitado, i, res); // visitar recursivamente el nodo adyacente
+        for (int j = 0; j < this.matrizAdyacencia[0].length; j++) {
+            if (this.matrizAdyacencia[indiceNodoActual][j] == 1 && !visitado[j]) { // si hay arista y el nodo no ha sido visitado
+                DFSrecursivo(visitado, j, res); // visitar recursivamente el nodo adyacente
             }
         }
     }
 
     public void BFS() {
 
-        boolean[] visitados = new boolean[nodos.length];
-        StringBuilder resultado = new StringBuilder();
+        boolean[] visitados = new boolean[nodos.length]; // arreglo para marcar los nodos ya visitados
+        StringBuilder resultado = new StringBuilder(); // guarda el recorrido BFS en orden de visita
 
-        int src = 0;
-        Queue<Integer> cola = new LinkedList<>();
-        visitados[src] = true;
-        cola.add(src);
+        // recorrer todos los nodos, por si el grafo no es conexo
+        for (int j = 0; j < nodos.length; j++) {
+            if (!visitados[j]) { // si el nodo actual aún no ha sido visitado
+                // entonces se inicia BFS desde ese nodo.
 
-        while (!cola.isEmpty()) {
-            int actual = cola.poll();
+                // j es el indice del nodo inicial en esta iteración.
 
-            if (!resultado.isEmpty()) {
-                resultado.append(", ");
-            }
-            resultado.append(nodos[actual]);
+                Queue<Integer> cola = new LinkedList<>(); // cola para recorrer el grafo por niveles
+                visitados[j] = true; // marcar como visitado el nodo inicial
+                cola.add(j); // agregar el nodo inicial a la cola
 
-            // visitar los nodos adyacentes no visitados del nodo actual
-            for (int i = 0; i < this.matrizAdyacencia[0].length; i++) {
-                if (this.matrizAdyacencia[actual][i] == 1 && !visitados[i]) {
-                    visitados[i] = true;
-                    cola.add(i);
+                while (!cola.isEmpty()) {
+                    int actual = cola.poll();
+
+                    if (!resultado.isEmpty()) { // si ya hay nodos en el recorrido
+                        resultado.append(", "); // separar con coma el siguiente nodo
+                    }
+                    resultado.append(nodos[actual]); // agregar el nodo actual al recorrido
+
+                    // visitar los nodos adyacentes no visitados del nodo actual
+                    for (int i = 0; i < this.matrizAdyacencia[0].length; i++) {
+                        if (this.matrizAdyacencia[actual][i] == 1 && !visitados[i]) { // si hay arista y el nodo no ha sido visitado
+                            visitados[i] = true; // marcar como visitado el nodo adyacente
+                            cola.add(i); // agregar el nodo adyacente a la cola
+                        }
+                    }
                 }
             }
         }
 
-        JOptionPane.showMessageDialog(null, "Resultado: " + resultado);
+        JOptionPane.showMessageDialog(null, "Resultado: " + resultado); // mostrar el recorrido final
     }
 
     public void insertarNodo() throws Exception {
@@ -560,6 +569,7 @@ public class Grafos {
             
             
             int[][] nuevaMatAdy = new int[matrizAdyacencia.length + 1][matrizAdyacencia.length + 1];
+            int[][] nuevosPesos = new int[pesos.length + 1][pesos.length + 1];
             String[] nuevoNodos = new String[nodos.length + 1];
 
             nuevoNodos[nuevoNodos.length - 1] = nuevoNodo;
@@ -568,6 +578,9 @@ public class Grafos {
                 for (int j = 0; j < matrizAdyacencia[0].length; j++) {
                     if (matrizAdyacencia[i][j] != 0) {
                         nuevaMatAdy[i][j] = matrizAdyacencia[i][j];
+                    }
+                    if (pesos[i][j] != 0) {
+                        nuevosPesos[i][j] = pesos[i][j];
                     }
                 }
             }
@@ -594,7 +607,7 @@ public class Grafos {
                 nuevoNodos[i] = nodos[i];
             }
             nodos = nuevoNodos;
-
+            pesos = nuevosPesos;
             setMatrizAdyacencia(nuevaMatAdy);
             setMatrizIncidencia(updateMatrizInc());
 
@@ -646,6 +659,7 @@ public class Grafos {
             int indiceEliminado = buscarIndiceNodo(nodoAEliminar);
             String[] nuevosNodos = new String[nodos.length - 1];
             int[][] nuevaMatAdy = new int[matrizAdyacencia.length - 1][matrizAdyacencia.length - 1];
+            int[][] nuevosPesos = new int[pesos.length - 1][pesos.length - 1];
 
             // llenar el nuevo arreglo de índice de nodos
             for (int i = 0, k = 0; i < nodos.length; i++) {
@@ -661,6 +675,7 @@ public class Grafos {
                     for (int j = 0, colNueva = 0; j < matrizAdyacencia[0].length; j++) {
                         if (j != indiceEliminado) {
                             nuevaMatAdy[filaNueva][colNueva] = matrizAdyacencia[i][j];
+                            nuevosPesos[filaNueva][colNueva] = pesos[i][j];
                             colNueva++;
                         }
                     }
@@ -669,6 +684,7 @@ public class Grafos {
             }
 
             nodos = nuevosNodos;
+            pesos = nuevosPesos;
             setMatrizAdyacencia(nuevaMatAdy);
             setMatrizIncidencia(updateMatrizInc());
 
@@ -681,7 +697,104 @@ public class Grafos {
     }
 
     public void Djikstra() {
-        // todo, codigo arboles, grafos no codiog
+
+        if (nodos.length < 2) { // si el grafo tiene menos de 2 nodos
+            JOptionPane.showMessageDialog(null, "Error: Deben haber al menos 2 nodos para ejecutar Dijkstra."); // avisar del error
+            return; // salir del método sin ejecutar Dijkstra
+        }
+
+        StringBuilder nodosDisponibles = new StringBuilder("Nodos disponibles:\n"); // lista de nodos para mostrar al usuario
+        for (int i = 0; i < nodos.length; i++) {
+            nodosDisponibles.append(nodos[i]).append("\n"); // agregar cada nodo a la lista mostrada
+        }
+
+        String nodoOrigen;
+        boolean origenValido;
+        do {
+            origenValido = true; // asumir entrada válida al inicio de cada intento
+            nodoOrigen = JOptionPane.showInputDialog(nodosDisponibles + "\nIngrese el nodo origen:\n\nIngrese 0 para regresar."); // pedir el nodo origen
+
+            if (nodoOrigen.isEmpty() || nodoOrigen.isBlank()) { // si no se ingresó nada
+                JOptionPane.showMessageDialog(null, "Error: debe ingresar un nodo origen."); // avisar del error
+                origenValido = false; // marcar la entrada como inválida
+            }
+
+            if (origenValido && !nodoOrigen.equals("0") && buscarIndiceNodo(nodoOrigen) == -1) { // si el nodo no existe en el grafo
+                JOptionPane.showMessageDialog(null, "Error: " + nodoOrigen + " no existe en el grafo."); // avisar del error
+                origenValido = false; // marcar la entrada como inválida
+            }
+        } while (origenValido == false); // repetir hasta obtener un origen válido
+
+        if (nodoOrigen.equals("0")) { // si el usuario pidió regresar
+            return; // salir del método sin hacer cambios
+        }
+
+        String nodoDestino;
+        boolean destinoValido;
+        do {
+            destinoValido = true; // asumir entrada válida al inicio de cada intento
+            nodoDestino = JOptionPane.showInputDialog(nodosDisponibles + "\nIngrese el nodo final:\n\nIngrese 0 para regresar."); // pedir el nodo final
+
+            if (nodoDestino.isEmpty() || nodoDestino.isBlank()) { // si no se ingresó nada
+                JOptionPane.showMessageDialog(null, "Error: debe ingresar un nodo final."); // avisar del error
+                destinoValido = false; // marcar la entrada como inválida
+            }
+
+            if (destinoValido && !nodoDestino.equals("0") && buscarIndiceNodo(nodoDestino) == -1) { // si el nodo no existe en el grafo
+                JOptionPane.showMessageDialog(null, "Error: " + nodoDestino + " no existe en el grafo."); // avisar del error
+                destinoValido = false; // marcar la entrada como inválida
+            }
+        } while (destinoValido == false); // repetir hasta obtener un destino válido
+
+        if (nodoDestino.equals("0")) { // si el usuario pidió regresar
+            return; // salir del método sin hacer cambios
+        }
+
+        pedirPesosFaltantes(); // pedir pesos para las aristas que aún no lo tengan definido
+
+        int origen = buscarIndiceNodo(nodoOrigen); // obtener el índice del nodo origen
+        int destino = buscarIndiceNodo(nodoDestino); // obtener el índice del nodo destino
+        int[] dist = new int[nodos.length]; // guarda la menor distancia conocida desde el origen
+        int[] previo = new int[nodos.length]; // guarda el nodo anterior en la mejor ruta encontrada
+        boolean[] visitado = new boolean[nodos.length]; // marca los nodos cuya distancia ya quedó fija
+
+        for (int i = 0; i < nodos.length; i++) {
+            dist[i] = Integer.MAX_VALUE; // inicialmente todas las distancias son infinito
+            previo[i] = -1; // inicialmente ningún nodo tiene predecesor
+        }
+
+        dist[origen] = 0; // la distancia del origen hacia sí mismo es 0
+
+        for (int i = 0; i < nodos.length; i++) {
+            int actual = buscarNodoConMenorDistancia(dist, visitado); // buscar el nodo no visitado con menor distancia
+
+            if (actual == -1) { // si no se encontró ningún nodo válido
+                break; // terminar el algoritmo
+            }
+
+            visitado[actual] = true; // fijar definitivamente la distancia del nodo actual
+
+            for (int j = 0; j < nodos.length; j++) {
+                if (matrizAdyacencia[actual][j] == 1
+                    && !visitado[j]
+                    && pesos[actual][j] > 0
+                    && dist[actual] != Integer.MAX_VALUE
+                    && dist[actual] + pesos[actual][j] < dist[j]) { // si pasar por actual mejora la distancia hacia j
+
+                    dist[j] = dist[actual] + pesos[actual][j]; // actualizar la mejor distancia conocida
+                    previo[j] = actual; // guardar el nodo actual como predecesor de j
+                }
+            }
+        }
+
+        if (dist[destino] == Integer.MAX_VALUE) { // si el destino sigue con distancia infinita
+            JOptionPane.showMessageDialog(null, "No existe ruta entre " + nodoOrigen + " y " + nodoDestino + "."); // avisar que no existe ruta
+            return; // salir del método
+        }
+
+        JOptionPane.showMessageDialog(null, // mostrar la ruta y el costo final calculados por Dijkstra
+            "Ruta más corta de " + nodoOrigen + " a " + nodoDestino + ": " + construirRuta(previo, destino)
+            + "\nCosto total: " + dist[destino]);
     }
     // mostrados
 
@@ -763,7 +876,6 @@ public class Grafos {
         }
 
         JScrollPane scroll = new JScrollPane(etiqueta);
-        scroll.setPreferredSize(new Dimension(800, 600));
 
         if (ventana != null) {
             ventana.dispose(); // cierra la ventana que haya abierta
@@ -773,12 +885,11 @@ public class Grafos {
 
         
         ventana.add(scroll); // se agrega el scroll (que contiene la label dela imagen) a la ventana
-        ventana.pack(); // toma el tamaño preferido del scroll
         ventana.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); // se establece que se cierre por completo al cerrar.
                                                                 // * por defecto esta en HIDE_ON_CLOSE
-        ventana.setVisible(true); // se hace visible (por defecto, las ventanas en Swing nacen ocultas)
-        
         actualizarGrafo(); // se asigna la imagen del grafo a la etiqueta, y se muestra en la ventana
+        ventana.pack(); // toma el tamaño preferido real de la imagen en la etiqueta
+        ventana.setVisible(true); // se hace visible (por defecto, las ventanas en Swing nacen ocultas)
     }
 
     public void mostrarMatAdy() {
@@ -873,6 +984,11 @@ public class Grafos {
             // Save as PNG
             visualGrafo.toFile(FileType.PNG).save("./", "dirigido");
             etiqueta.setIcon(new ImageIcon("./dirigido.png"));
+        }
+
+        etiqueta.revalidate();
+        if (ventana != null) {
+            ventana.pack();
         }
     }
      
@@ -1060,5 +1176,100 @@ public class Grafos {
         }
 
         return indice;
+    }
+
+    public void pedirPesosFaltantes() {
+
+        if (tipo == 1) {
+            for (int i = 0; i < nodos.length; i++) {
+                for (int j = i + 1; j < nodos.length; j++) {
+                    if (matrizAdyacencia[i][j] == 1) { // si existe arista entre ambos nodos
+                        if (pesos[i][j] == 0 && pesos[j][i] != 0) { // si falta un peso pero el del sentido contrario ya existe
+                            pesos[i][j] = pesos[j][i]; // copiar el mismo peso en este sentido
+                        } else if (pesos[j][i] == 0 && pesos[i][j] != 0) { // si falta el peso contrario pero este ya existe
+                            pesos[j][i] = pesos[i][j]; // copiar el mismo peso en el sentido contrario
+                        } else if (pesos[i][j] == 0 && pesos[j][i] == 0) { // si ambos sentidos siguen sin peso definido
+                            int peso = pedirPesoArista(nodos[i], nodos[j]); // pedir el peso de la arista
+                            pesos[i][j] = peso; // guardar el peso en un sentido
+                            pesos[j][i] = peso; // guardar el mismo peso en el otro sentido
+                        }
+                    }
+                }
+            }
+        }
+
+        if (tipo == 2) {
+            for (int i = 0; i < nodos.length; i++) {
+                for (int j = 0; j < nodos.length; j++) {
+                    if (matrizAdyacencia[i][j] == 1 && pesos[i][j] == 0) { // si existe arista y su peso aún no fue definido
+                        pesos[i][j] = pedirPesoArista(nodos[i], nodos[j]); // pedir el peso de esa arista dirigida
+                    }
+                }
+            }
+        }
+    }
+
+    public int pedirPesoArista(String nodoOrigen, String nodoDestino) {
+
+        boolean pesoValido;
+        String pesoString;
+        int peso = 0;
+
+        do {
+            pesoValido = true; // asumir entrada válida al inicio de cada intento
+            pesoString = JOptionPane.showInputDialog("Ingrese el peso de la arista entre \"" + nodoOrigen + "\" y \"" + nodoDestino + "\"."); // pedir el peso al usuario
+
+            if (pesoString.isEmpty() || pesoString.isBlank()) { // si no se ingresó nada
+                JOptionPane.showMessageDialog(null, "Error: debe ingresar un peso."); // avisar del error
+                pesoValido = false; // marcar la entrada como inválida
+            } else if (!pesoString.matches("\\d+")) { // si el valor no es un entero positivo
+                JOptionPane.showMessageDialog(null, "Error: debe ingresar un número entero positivo."); // avisar del error
+                pesoValido = false; // marcar la entrada como inválida
+            } else {
+                peso = Integer.parseInt(pesoString); // convertir el peso ingresado a entero
+                if (peso <= 0) { // si el peso no es mayor que 0
+                    JOptionPane.showMessageDialog(null, "Error: el peso debe ser mayor que 0."); // avisar del error
+                    pesoValido = false; // marcar la entrada como inválida
+                }
+            }
+        } while (pesoValido == false); // repetir hasta obtener un peso válido
+
+        return peso; // devolver el peso validado
+    }
+
+    public int buscarNodoConMenorDistancia(int[] dist, boolean[] visitado) {
+
+        int menorDistancia = Integer.MAX_VALUE;
+        int indice = -1;
+
+        for (int i = 0; i < nodos.length; i++) {
+            if (!visitado[i] && dist[i] < menorDistancia) { // si el nodo no fue visitado y tiene menor distancia
+                menorDistancia = dist[i]; // actualizar la menor distancia encontrada
+                indice = i; // guardar el índice de ese nodo
+            }
+        }
+
+        return indice; // devolver el nodo no visitado con menor distancia
+    }
+
+    public String construirRuta(int[] previo, int destino) {
+
+        int[] ruta = new int[nodos.length];
+        int cantidad = 0;
+        StringBuilder recorrido = new StringBuilder();
+
+        for (int actual = destino; actual != -1; actual = previo[actual]) { // recorrer la ruta desde el destino hacia atrás
+            ruta[cantidad] = actual; // guardar el nodo actual en la ruta
+            cantidad++; // aumentar la cantidad de nodos guardados
+        }
+
+        for (int i = cantidad - 1; i >= 0; i--) {
+            recorrido.append(nodos[ruta[i]]); // agregar el nodo al recorrido final
+            if (i > 0) { // si aún faltan nodos por agregar
+                recorrido.append(" -> "); // separar con flecha el siguiente nodo de la ruta
+            }
+        }
+
+        return recorrido.toString(); // devolver la ruta reconstruida
     }
 }
